@@ -103,6 +103,9 @@ def shipments():
         db.session.add(shipment)
         db.session.commit()
         
+        from firebase_sync import sync_shipment_to_firebase
+        sync_shipment_to_firebase(shipment)
+        
         import qrcode, os
         from config import Config
         qr = qrcode.QRCode(version=1, box_size=10, border=5)

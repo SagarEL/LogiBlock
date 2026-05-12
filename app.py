@@ -5,6 +5,7 @@ from models import db, User
 from flask_login import LoginManager
 from werkzeug.security import generate_password_hash
 from blockchain import Blockchain
+from firebase_config import init_firebase
 
 blockchain = Blockchain()
 
@@ -14,6 +15,7 @@ def create_app():
     
     Config.init_app(app)
     db.init_app(app)
+    init_firebase()
     
     login_manager = LoginManager()
     login_manager.init_app(app)
