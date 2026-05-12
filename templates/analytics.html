@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block header %}Analytics Dashboard{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="glass-card p-8 rounded-2xl animate-fade-in">
+        <h3 class="text-xl font-bold mb-6">Shipment Status Distribution</h3>
+        <div class="relative h-[400px] flex items-center justify-center">
+            <canvas id="statusChart"></canvas>
+        </div>
+    </div>
+    
+    <div class="glass-card p-8 rounded-2xl animate-fade-in delay-100">
+        <h3 class="text-xl font-bold mb-6">Blockchain Growth Activity</h3>
+        <div class="relative h-[400px] flex items-center justify-center">
+            <canvas id="growthChart"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusData = {{ status_data|tojson|safe }};
+        
+        const labels = Object.keys(statusData);
+        const data = Object.values(statusData);
+        
+        const bgColors = [
+            'rgba(59, 130, 246, 0.7)',  // blue
+            'rgba(16, 185, 129, 0.7)',  // green
+            'rgba(245, 158, 11, 0.7)',  // yellow
+            'rgba(139, 92, 246, 0.7)',  // purple
+            'rgba(236, 72, 153, 0.7)',  // pink
+            'rgba(100, 116, 139, 0.7)'   // slate
+        ];
+        
+        const borderColors = bgColors.map(color => color.replace('0.7', '1'));
+
+        const ctxStatus = document.getElementById('statusChart').getContext('2d');
+        new Chart(ctxStatus, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: bgColors,
+                    borderColor: borderColors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { color: '#cbd5e1' }
+                    }
+                }
+            }
+        });
+
+        // Mock growth data for visual effect
+        const ctxGrowth = document.getElementById('growthChart').getContext('2d');
+        new Chart(ctxGrowth, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Blocks Added',
+                    data: [12, 19, 3, 5, 2, 30], // Mock
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#cbd5e1' } },
+                    x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#cbd5e1' } }
+                },
+                plugins: {
+                    legend: { labels: { color: '#cbd5e1' } }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

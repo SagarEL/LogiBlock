@@ -1,0 +1,93 @@
+{% extends 'base/admin_base.html' %}
+
+{% block admin_content %}
+<div class="mb-8 flex justify-between items-center">
+    <div>
+        <h1 class="text-3xl font-bold">Active Shipments</h1>
+        <p class="text-gray-400">Manage and monitor logistics operations</p>
+    </div>
+    <button onclick="document.getElementById('addModal').classList.remove('hidden')" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg font-semibold">
+        <i class="fas fa-plus"></i> New Shipment
+    </button>
+</div>
+
+<div class="glass rounded-xl overflow-hidden">
+    <table class="w-full text-left border-collapse">
+        <thead>
+            <tr class="bg-slate-800/50 border-b border-slate-700">
+                <th class="p-4 text-sm font-semibold text-gray-300">Shipment ID</th>
+                <th class="p-4 text-sm font-semibold text-gray-300">Route</th>
+                <th class="p-4 text-sm font-semibold text-gray-300">From / To</th>
+                <th class="p-4 text-sm font-semibold text-gray-300">Status</th>
+                <th class="p-4 text-sm font-semibold text-gray-300">Current Location</th>
+                <th class="p-4 text-sm font-semibold text-gray-300">QR Code</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in shipments %}
+            <tr class="border-b border-slate-700/50 hover:bg-slate-800/30 transition">
+                <td class="p-4 font-mono text-sm text-blue-400">{{ s.shipment_id }}</td>
+                <td class="p-4 text-sm">{{ s.route.route_id }}</td>
+                <td class="p-4 text-sm">{{ s.sender }} <i class="fas fa-long-arrow-alt-right mx-1 text-gray-500"></i> {{ s.receiver }}</td>
+                <td class="p-4">
+                    <span class="px-2 py-1 rounded text-xs font-semibold
+                        {% if s.status == 'Created' %} bg-blue-900/50 text-blue-400
+                        {% elif s.status == 'In Transit' %} bg-yellow-900/50 text-yellow-400
+                        {% elif s.status == 'Suspicious' %} bg-red-900/50 text-red-400
+                        {% else %} bg-emerald-900/50 text-emerald-400 {% endif %}">
+                        {{ s.status }}
+                    </span>
+                </td>
+                <td class="p-4 text-sm">{{ s.current_location }}</td>
+                <td class="p-4 text-center">
+                    <a href="{{ url_for('static', filename='qr/' + s.shipment_id + '.png') }}" target="_blank" class="text-blue-400 hover:text-blue-300">
+                        <i class="fas fa-qrcode text-xl"></i>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Add Modal -->
+<div id="addModal" class="hidden fixed inset-0 bg-black/80 flex justify-center items-center z-50">
+    <div class="glass p-8 rounded-xl max-w-md w-full">
+        <h2 class="text-2xl font-bold mb-6">Create New Shipment</h2>
+        <form method="POST" class="space-y-4">
+            <div>
+                <label class="block text-sm text-gray-400">Authorized Route</label>
+                <select name="route_id" required class="w-full bg-slate-800 rounded p-2 text-white border border-slate-600">
+                    <option value="">Select Route...</option>
+                    {% for r in routes %}
+                    <option value="{{ r.id }}">{{ r.route_id }} ({{ r.source }} -> {{ r.destination }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm text-gray-400">Delivery Agent (Optional)</label>
+                <select name="agent_id" class="w-full bg-slate-800 rounded p-2 text-white border border-slate-600">
+                    <option value="">Select Agent...</option>
+                    {% for a in agents %}
+                    <option value="{{ a.id }}">{{ a.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm text-gray-400">Sender Name</label>
+                    <input type="text" name="sender" required class="w-full bg-slate-800 rounded p-2 text-white border border-slate-600">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400">Receiver Name</label>
+                    <input type="text" name="receiver" required class="w-full bg-slate-800 rounded p-2 text-white border border-slate-600">
+                </div>
+            </div>
+            <div class="flex justify-end space-x-4 mt-6">
+                <button type="button" onclick="document.getElementById('addModal').classList.add('hidden')" class="px-4 py-2 bg-slate-700 rounded-lg">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 rounded-lg">Forge Block & Create</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

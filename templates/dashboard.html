@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block header %}Dashboard Overview{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="glass-card p-6 rounded-2xl animate-fade-in delay-100 flex items-center justify-between border-l-4 border-blue-500">
+        <div>
+            <p class="text-sm text-slate-400 mb-1">Total Shipments</p>
+            <h3 class="text-3xl font-bold">{{ total }}</h3>
+        </div>
+        <div class="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 text-xl">
+            <i class="fa-solid fa-boxes-stacked"></i>
+        </div>
+    </div>
+    
+    <div class="glass-card p-6 rounded-2xl animate-fade-in delay-200 flex items-center justify-between border-l-4 border-green-500">
+        <div>
+            <p class="text-sm text-slate-400 mb-1">Delivered</p>
+            <h3 class="text-3xl font-bold">{{ delivered }}</h3>
+        </div>
+        <div class="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 text-xl">
+            <i class="fa-solid fa-check-circle"></i>
+        </div>
+    </div>
+    
+    <div class="glass-card p-6 rounded-2xl animate-fade-in delay-300 flex items-center justify-between border-l-4 border-yellow-500">
+        <div>
+            <p class="text-sm text-slate-400 mb-1">Active Shipments</p>
+            <h3 class="text-3xl font-bold">{{ active }}</h3>
+        </div>
+        <div class="w-12 h-12 rounded-full bg-yellow-500/10 flex items-center justify-center text-yellow-500 text-xl">
+            <i class="fa-solid fa-truck-fast"></i>
+        </div>
+    </div>
+    
+    <div class="glass-card p-6 rounded-2xl animate-fade-in delay-[400ms] flex items-center justify-between border-l-4 {% if status == 'Secure' %}border-emerald-500{% else %}border-red-500{% endif %}">
+        <div>
+            <p class="text-sm text-slate-400 mb-1">Blockchain Status</p>
+            <h3 class="text-lg font-bold {% if status == 'Secure' %}text-emerald-400{% else %}text-red-400{% endif %}">{{ status }}</h3>
+            {% if tampered > 0 %}
+                <p class="text-xs text-red-400 mt-1"><i class="fa-solid fa-triangle-exclamation"></i> {{ tampered }} tampered block(s)</p>
+            {% endif %}
+        </div>
+        <div class="w-12 h-12 rounded-full {% if status == 'Secure' %}bg-emerald-500/10 text-emerald-500{% else %}bg-red-500/10 text-red-500{% endif %} flex items-center justify-center text-xl">
+            <i class="fa-solid {% if status == 'Secure' %}fa-shield-check{% else %}fa-shield-halved{% endif %}"></i>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="glass-card p-6 rounded-2xl animate-fade-in delay-[500ms]">
+        <h3 class="text-xl font-semibold mb-6 flex items-center"><i class="fa-solid fa-chart-bar text-blue-500 mr-2"></i> Quick Actions</h3>
+        <div class="space-y-4">
+            <a href="{{ url_for('create_shipment') }}" class="block p-4 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700 transition-colors group">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-slate-200">Create New Shipment</h4>
+                        <p class="text-sm text-slate-400">Initialize a new package tracking record</p>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{{ url_for('view_blockchain') }}" class="block p-4 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700 transition-colors group">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-link"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-slate-200">View Blockchain Ledger</h4>
+                        <p class="text-sm text-slate-400">Inspect the immutable blocks</p>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{{ url_for('validate') }}" class="block p-4 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700 transition-colors group">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-search"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-slate-200">Validate Chain Integrity</h4>
+                        <p class="text-sm text-slate-400">Run the validation algorithm</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    
+    <div class="glass-card p-6 rounded-2xl animate-fade-in delay-[600ms]">
+        <h3 class="text-xl font-semibold mb-6 flex items-center"><i class="fa-solid fa-cube text-indigo-500 mr-2"></i> System Info</h3>
+        <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+            <h4 class="font-medium mb-4 text-slate-300">Blockchain Configuration</h4>
+            <ul class="space-y-3 text-sm text-slate-400">
+                <li class="flex justify-between border-b border-slate-700/50 pb-2">
+                    <span>Algorithm</span>
+                    <span class="font-mono text-blue-400">SHA-256</span>
+                </li>
+                <li class="flex justify-between border-b border-slate-700/50 pb-2">
+                    <span>Ledger Type</span>
+                    <span class="text-white">Local SQLite (simulation)</span>
+                </li>
+                <li class="flex justify-between border-b border-slate-700/50 pb-2">
+                    <span>Decentralization</span>
+                    <span class="text-white">Single Node</span>
+                </li>
+                <li class="flex justify-between border-b border-slate-700/50 pb-2">
+                    <span>Tamper Protection</span>
+                    <span class="text-emerald-400">Active</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

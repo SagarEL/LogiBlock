@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block header %}System Integrity Check{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-8">
+    <div class="glass-card p-10 rounded-2xl animate-fade-in text-center">
+        {% if is_valid %}
+            <div class="w-24 h-24 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-6">
+                <i class="fa-solid fa-shield-check text-5xl text-emerald-500"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-emerald-400 mb-4">Blockchain Secure</h2>
+            <p class="text-slate-300 mb-8">All cryptographic hashes are valid. No tampering detected. The logistics ledger is intact and trusted.</p>
+        {% else %}
+            <div class="w-24 h-24 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(239,68,68,0.3)]">
+                <i class="fa-solid fa-triangle-exclamation text-5xl text-red-500"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-red-500 mb-4">Tampering Detected!</h2>
+            <p class="text-slate-300 mb-4">The cryptographic links have been broken. Block data has been unauthorizedly modified.</p>
+            <div class="inline-block px-4 py-2 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 font-mono text-sm mb-8">
+                Integrity validation failed at Block #{{ invalid_index }}
+            </div>
+        {% endif %}
+
+        <div class="p-6 bg-slate-900/50 rounded-xl border border-slate-800 text-left">
+            <h3 class="font-bold text-lg mb-4 flex items-center"><i class="fa-solid fa-microchip text-blue-500 mr-2"></i> How Validation Works</h3>
+            <p class="text-sm text-slate-400 mb-4">The system traverses the entire blockchain and performs two critical checks on every block:</p>
+            <ul class="space-y-3 text-sm text-slate-300">
+                <li class="flex items-start">
+                    <i class="fa-solid fa-check text-blue-500 mt-1 mr-3"></i>
+                    <span><strong>Data Integrity:</strong> Recalculates the SHA-256 hash of the block's current data and compares it to the stored hash.</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fa-solid fa-check text-blue-500 mt-1 mr-3"></i>
+                    <span><strong>Chain Continuity:</strong> Verifies that the block's `previous_hash` exactly matches the `current_hash` of the preceding block.</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Academic Demonstration Section -->
+    <div class="glass-card p-8 rounded-2xl border border-yellow-500/30 animate-fade-in delay-200">
+        <div class="flex items-start">
+            <div class="w-12 h-12 rounded-full bg-yellow-500/10 flex items-center justify-center text-yellow-500 text-xl mr-4 shrink-0">
+                <i class="fa-solid fa-flask"></i>
+            </div>
+            <div>
+                <h3 class="text-xl font-bold text-yellow-500 mb-2">Academic Demonstration</h3>
+                <p class="text-slate-300 mb-6 text-sm">
+                    This feature allows you to simulate a cyberattack by intentionally modifying data in the blockchain without recalculating the hashes. This will break the cryptographic chain and demonstrate the tamper-detection capabilities.
+                </p>
+                <form action="{{ url_for('simulate_tamper') }}" method="POST" onsubmit="return confirm('WARNING: This will corrupt the blockchain data to demonstrate tampering. Proceed?');">
+                    <button type="submit" class="px-6 py-3 bg-red-600 hover:bg-red-500 text-white font-medium rounded-xl shadow-lg shadow-red-500/25 transition-all flex items-center">
+                        <i class="fa-solid fa-bug mr-2"></i> Simulate Tampering
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

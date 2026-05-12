@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block header %}Shipment Details: {{ shipment.shipment_id }}{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main Info -->
+    <div class="lg:col-span-2 space-y-8">
+        <div class="glass-card p-8 rounded-2xl animate-fade-in">
+            <div class="flex justify-between items-start mb-6 pb-6 border-b border-slate-800">
+                <div>
+                    <h2 class="text-2xl font-bold mb-2">{{ shipment.product }}</h2>
+                    <p class="text-slate-400 font-mono">Tracking ID: <span class="text-blue-400">{{ shipment.shipment_id }}</span></p>
+                </div>
+                <span class="px-4 py-2 rounded-full text-sm font-medium
+                    {% if shipment.status == 'Delivered' %}bg-green-500/20 text-green-400
+                    {% elif shipment.status == 'In Transit' %}bg-blue-500/20 text-blue-400
+                    {% elif shipment.status == 'Created' %}bg-slate-500/20 text-slate-400
+                    {% else %}bg-yellow-500/20 text-yellow-400{% endif %}">
+                    {{ shipment.status }}
+                </span>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-8">
+                <div>
+                    <p class="text-sm text-slate-500 mb-1">Sender</p>
+                    <p class="font-medium text-slate-200">{{ shipment.sender }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-slate-500 mb-1">Receiver</p>
+                    <p class="font-medium text-slate-200">{{ shipment.receiver }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-slate-500 mb-1">Current Location</p>
+                    <p class="font-medium text-slate-200 flex items-center">
+                        <i class="fa-solid fa-location-dot text-red-500 mr-2"></i> {{ shipment.location }}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-sm text-slate-500 mb-1">Timestamp</p>
+                    <p class="font-medium text-slate-200">{{ shipment.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Update Form -->
+        {% if current_user.is_authenticated and current_user.role in ['Admin', 'Warehouse Staff', 'Delivery Agent'] %}
+        <div class="glass-card p-8 rounded-2xl animate-fade-in delay-100">
+            <h3 class="text-xl font-bold mb-6">Update Status</h3>
+            <form method="POST" action="{{ url_for('shipment_detail', shipment_id=shipment.shipment_id) }}" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">New Status</label>
+                        <select name="status" class="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 text-white outline-none">
+                            <option value="Created" {% if shipment.status == 'Created' %}selected{% endif %}>Created</option>
+                            <option value="Dispatched" {% if shipment.status == 'Dispatched' %}selected{% endif %}>Dispatched</option>
+                            <option value="Warehouse Received" {% if shipment.status == 'Warehouse Received' %}selected{% endif %}>Warehouse Received</option>
+                            <option value="In Transit" {% if shipment.status == 'In Transit' %}selected{% endif %}>In Transit</option>
+                            <option value="Out For Delivery" {% if shipment.status == 'Out For Delivery' %}selected{% endif %}>Out For Delivery</option>
+                            <option value="Delivered" {% if shipment.status == 'Delivered' %}selected{% endif %}>Delivered</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">Current Location</label>
+                        <input type="text" name="location" value="{{ shipment.location }}" required class="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 text-white outline-none">
+                    </div>
+                </div>
+                <div class="flex justify-end pt-4">
+                    <button type="submit" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-xl shadow-lg shadow-blue-500/25 transition-all">
+                        <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Update Blockchain
+                    </button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Sidebar: QR & Timeline -->
+    <div class="space-y-8">
+        <!-- QR Code -->
+        <div class="glass-card p-8 rounded-2xl animate-fade-in delay-200 text-center flex flex-col items-center">
+            <h3 class="text-lg font-bold mb-4">Tracking QR Code</h3>
+            <div class="p-4 bg-white rounded-xl mb-4">
+                <img src="{{ url_for('static', filename='qr/' + shipment.shipment_id + '.png') }}" alt="QR Code" class="w-48 h-48">
+            </div>
+            <p class="text-sm text-slate-400">Scan to track securely on the blockchain</p>
+        </div>
+
+        <!-- Blockchain Timeline -->
+        <div class="glass-card p-8 rounded-2xl animate-fade-in delay-300">
+            <h3 class="text-lg font-bold mb-6 flex items-center">
+                <i class="fa-solid fa-link text-blue-500 mr-2"></i> Blockchain Records
+            </h3>
+            <div class="timeline-container">
+                {% for block in history %}
+                <div class="timeline-item">
+                    <div class="timeline-icon">
+                        <i class="fa-solid fa-check text-blue-500 text-xs"></i>
+                    </div>
+                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-bold text-blue-400">Block #{{ block.block_index }}</h4>
+                            <span class="text-xs text-slate-500">{{ block.timestamp|round(1) }}</span>
+                        </div>
+                        <p class="text-sm text-slate-300 font-mono truncate mb-2" title="{{ block.current_hash }}">Hash: {{ block.current_hash[:16] }}...</p>
+                        <div class="text-xs text-slate-400 bg-slate-900 p-2 rounded break-all whitespace-pre-wrap">
+                            {{ block.data }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

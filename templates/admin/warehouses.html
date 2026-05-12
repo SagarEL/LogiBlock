@@ -1,0 +1,68 @@
+{% extends 'base/admin_base.html' %}
+
+{% block admin_content %}
+<div class="mb-8 flex justify-between items-center">
+    <div>
+        <h1 class="text-3xl font-bold">Warehouses</h1>
+        <p class="text-gray-400">Manage verified warehouse locations</p>
+    </div>
+    <button onclick="document.getElementById('addModal').classList.remove('hidden')" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg font-semibold">
+        <i class="fas fa-plus"></i> Add Warehouse
+    </button>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for wh in warehouses %}
+    <div class="glass p-6 rounded-xl">
+        <div class="flex justify-between items-start mb-4">
+            <h3 class="text-xl font-bold text-blue-400">{{ wh.warehouse_name }}</h3>
+            <span class="bg-slate-700 px-2 py-1 rounded text-xs">{{ wh.warehouse_code }}</span>
+        </div>
+        <p class="text-gray-300 mb-2"><i class="fas fa-map-marker-alt text-gray-500"></i> {{ wh.location }}</p>
+        <p class="text-sm text-gray-400 font-mono">ID: {{ wh.warehouse_id }}</p>
+        {% if wh.lat and wh.lng %}
+        <p class="text-sm text-gray-500 mt-2">GPS: {{ wh.lat }}, {{ wh.lng }}</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Add Modal -->
+<div id="addModal" class="hidden fixed inset-0 bg-black/80 flex justify-center items-center z-50">
+    <div class="glass p-8 rounded-xl max-w-md w-full">
+        <h2 class="text-2xl font-bold mb-6">Add New Warehouse</h2>
+        <form method="POST" class="space-y-4">
+            <div>
+                <label class="block text-sm text-gray-400">Warehouse ID (e.g. WH-A-102)</label>
+                <input type="text" name="warehouse_id" required class="w-full bg-slate-800 rounded p-2 text-white border border-slate-600">
+            </div>
+            <div>
+                <label class="block text-sm text-gray-400">Name</label>
+                <input type="text" name="warehouse_name" required class="w-full bg-slate-800 rounded p-2 text-white border border-slate-600">
+            </div>
+            <div>
+                <label class="block text-sm text-gray-400">Location</label>
+                <input type="text" name="location" required class="w-full bg-slate-800 rounded p-2 text-white border border-slate-600">
+            </div>
+            <div>
+                <label class="block text-sm text-gray-400">Code</label>
+                <input type="text" name="warehouse_code" required class="w-full bg-slate-800 rounded p-2 text-white border border-slate-600">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm text-gray-400">Latitude (Optional)</label>
+                    <input type="number" step="any" name="lat" class="w-full bg-slate-800 rounded p-2 text-white border border-slate-600">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400">Longitude (Optional)</label>
+                    <input type="number" step="any" name="lng" class="w-full bg-slate-800 rounded p-2 text-white border border-slate-600">
+                </div>
+            </div>
+            <div class="flex justify-end space-x-4 mt-6">
+                <button type="button" onclick="document.getElementById('addModal').classList.add('hidden')" class="px-4 py-2 bg-slate-700 rounded-lg">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 rounded-lg">Save Warehouse</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

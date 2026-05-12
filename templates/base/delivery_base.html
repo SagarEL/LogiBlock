@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="flex h-screen overflow-hidden">
+    <aside class="w-64 bg-zinc-900 border-r border-emerald-900/30 h-full flex flex-col">
+        <div class="p-6 bg-zinc-800 border-b border-emerald-900/50">
+            <h2 class="text-2xl font-bold text-emerald-400">Agent Nav</h2>
+            <p class="text-xs text-zinc-400">Delivery Console</p>
+        </div>
+        <nav class="flex-1 px-4 py-4 space-y-2">
+            <a href="{{ url_for('delivery.dashboard') }}" class="block px-4 py-3 rounded text-zinc-300 hover:bg-zinc-800 hover:text-emerald-400 transition"><i class="fas fa-truck-fast w-6"></i> My Route</a>
+        </nav>
+        <div class="p-4 bg-zinc-800">
+            <a href="{{ url_for('auth.logout') }}" class="block px-4 py-2 text-center rounded bg-emerald-600 hover:bg-emerald-700 text-white font-bold"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </aside>
+    <main class="flex-1 h-full overflow-y-auto bg-[#09090b] p-8">
+        {% block delivery_content %}{% endblock %}
+    </main>
+</div>
+{% endblock %}

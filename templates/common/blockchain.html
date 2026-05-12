@@ -1,0 +1,51 @@
+{% extends 'base/admin_base.html' %}
+
+{% block admin_content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold">Blockchain Ledger</h1>
+    <p class="text-gray-400">Immutable record of all logistics operations</p>
+</div>
+
+<div class="space-y-6">
+    {% for block in chain %}
+    <div class="glass p-6 rounded-xl border border-slate-700 relative">
+        {% if not loop.first %}
+        <div class="absolute -top-6 left-1/2 w-0.5 h-6 bg-blue-500"></div>
+        <i class="fas fa-arrow-down absolute -top-3 left-1/2 transform -translate-x-1/2 text-blue-500"></i>
+        {% endif %}
+        
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <span class="bg-blue-900/50 text-blue-400 px-3 py-1 rounded-full text-sm font-bold">Block #{{ block.block_index }}</span>
+                <span class="ml-2 text-gray-400 text-sm"><i class="far fa-clock"></i> {{ block.timestamp }}</span>
+            </div>
+            <span class="bg-slate-700 px-2 py-1 rounded text-xs font-mono">{{ block.block_type }}</span>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+                <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Previous Hash</p>
+                <p class="text-xs font-mono text-gray-400 break-all bg-slate-900 p-2 rounded border border-slate-800">{{ block.previous_hash }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Current Hash</p>
+                <p class="text-xs font-mono text-emerald-400 break-all bg-slate-900 p-2 rounded border border-slate-800">{{ block.current_hash }}</p>
+            </div>
+        </div>
+        
+        <div class="bg-slate-900 p-4 rounded border border-slate-800">
+            <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-2">Payload Data</p>
+            <pre class="text-sm text-gray-300 font-mono whitespace-pre-wrap">{{ block.data }}</pre>
+            
+            {% if block.route_hash %}
+            <p class="text-xs text-gray-500 mt-2">Route Hash: <span class="text-purple-400">{{ block.route_hash }}</span></p>
+            {% endif %}
+            
+            {% if block.warehouse_id %}
+            <p class="text-xs text-gray-500 mt-1">Warehouse: <span class="text-blue-400">{{ block.warehouse_id }}</span></p>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

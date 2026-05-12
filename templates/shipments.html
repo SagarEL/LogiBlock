@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block header %}Shipment Management{% endblock %}
+
+{% block content %}
+<div class="glass-card p-8 rounded-2xl animate-fade-in">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold">All Shipments</h2>
+        <a href="{{ url_for('create_shipment') }}" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors shadow-lg shadow-blue-500/30">
+            <i class="fa-solid fa-plus mr-2"></i> New Shipment
+        </a>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="border-b border-slate-700 text-slate-400">
+                    <th class="p-4 font-medium">Tracking ID</th>
+                    <th class="p-4 font-medium">Sender</th>
+                    <th class="p-4 font-medium">Receiver</th>
+                    <th class="p-4 font-medium">Status</th>
+                    <th class="p-4 font-medium">Date</th>
+                    <th class="p-4 font-medium">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for shipment in shipments %}
+                <tr class="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
+                    <td class="p-4 font-mono text-blue-400">
+                        <a href="{{ url_for('shipment_detail', shipment_id=shipment.shipment_id) }}" class="hover:underline">
+                            {{ shipment.shipment_id }}
+                        </a>
+                    </td>
+                    <td class="p-4 text-slate-300">{{ shipment.sender }}</td>
+                    <td class="p-4 text-slate-300">{{ shipment.receiver }}</td>
+                    <td class="p-4">
+                        <span class="px-3 py-1 rounded-full text-xs font-medium
+                            {% if shipment.status == 'Delivered' %}bg-green-500/20 text-green-400
+                            {% elif shipment.status == 'In Transit' %}bg-blue-500/20 text-blue-400
+                            {% elif shipment.status == 'Created' %}bg-slate-500/20 text-slate-400
+                            {% else %}bg-yellow-500/20 text-yellow-400{% endif %}">
+                            {{ shipment.status }}
+                        </span>
+                    </td>
+                    <td class="p-4 text-slate-400 text-sm">{{ shipment.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td class="p-4">
+                        <a href="{{ url_for('shipment_detail', shipment_id=shipment.shipment_id) }}" class="text-blue-400 hover:text-blue-300 mr-3">
+                            <i class="fa-solid fa-eye"></i>
+                        </a>
+                        {% if current_user.role == 'Admin' %}
+                        <form action="{{ url_for('delete_shipment', shipment_id=shipment.shipment_id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this shipment?');">
+                            <button type="submit" class="text-red-400 hover:text-red-300">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="p-8 text-center text-slate-500">No shipments found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

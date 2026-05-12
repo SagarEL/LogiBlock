@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block header %}Create New Shipment{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto glass-card p-8 rounded-2xl animate-fade-in">
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-500">Initialize Shipment</h2>
+        <p class="text-slate-400 mt-2">Create a new tracking record that will be securely logged on the blockchain.</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('create_shipment') }}" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Sender Name</label>
+                <input type="text" name="sender" required class="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-500 outline-none transition-all">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Receiver Name</label>
+                <input type="text" name="receiver" required class="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-500 outline-none transition-all">
+            </div>
+            
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-slate-300 mb-2">Product Description</label>
+                <input type="text" name="product" required class="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-500 outline-none transition-all">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Origin Location</label>
+                <input type="text" name="origin" required class="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-500 outline-none transition-all">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Destination</label>
+                <input type="text" name="destination" required class="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-500 outline-none transition-all">
+            </div>
+        </div>
+
+        <div class="pt-6 border-t border-slate-800 flex justify-end gap-4">
+            <a href="{{ url_for('shipments') }}" class="px-6 py-3 text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition-colors">Cancel</a>
+            <button type="submit" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium rounded-xl shadow-lg shadow-blue-500/25 transform transition-all hover:-translate-y-0.5 outline-none">
+                <i class="fa-solid fa-link mr-2"></i> Create & Anchor on Blockchain
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

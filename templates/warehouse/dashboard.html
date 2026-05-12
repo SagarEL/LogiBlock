@@ -1,0 +1,29 @@
+{% extends 'base/warehouse_base.html' %}
+{% block warehouse_content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold">Incoming Shipments</h1>
+    <p class="text-gray-400">Scan QR codes to verify and process parcels</p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for s in shipments %}
+    <div class="glass p-6 rounded-xl border-l-4 {{ 'border-yellow-500' if s.status == 'In Transit' else 'border-blue-500' }}">
+        <div class="flex justify-between items-start mb-4">
+            <h3 class="text-xl font-bold font-mono text-blue-400">{{ s.shipment_id }}</h3>
+            <span class="bg-stone-700 px-2 py-1 rounded text-xs">{{ s.status }}</span>
+        </div>
+        <p class="text-sm text-gray-300 mb-2">From: {{ s.sender }} <br> To: {{ s.receiver }}</p>
+        <p class="text-xs text-gray-400 mb-4"><i class="fas fa-map-marker-alt"></i> Last Location: {{ s.current_location }}</p>
+        
+        <a href="{{ url_for('warehouse.verify', shipment_id=s.shipment_id) }}" class="block w-full text-center bg-orange-600 hover:bg-orange-700 text-white py-2 rounded-lg transition">
+            Verify & Process
+        </a>
+    </div>
+    {% endfor %}
+    {% if not shipments %}
+    <div class="col-span-full glass p-8 text-center rounded-xl text-gray-400">
+        No active shipments currently awaiting processing.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

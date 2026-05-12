@@ -1,0 +1,53 @@
+{% extends 'base/admin_base.html' %}
+
+{% block admin_content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold">Security & Validation</h1>
+    <p class="text-gray-400">Verify the cryptographic integrity of the entire supply chain network.</p>
+</div>
+
+<div class="max-w-3xl">
+    <div class="glass p-8 rounded-xl mb-8 border {{ 'border-green-500/50' if is_valid else 'border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.5)]' }}">
+        <div class="flex items-center space-x-4 mb-6">
+            <div class="w-16 h-16 rounded-full flex items-center justify-center {{ 'bg-green-900 text-green-400' if is_valid else 'bg-red-900 text-red-500 animate-pulse' }}">
+                <i class="fas {{ 'fa-shield-check text-3xl' if is_valid else 'fa-exclamation-triangle text-3xl' }}"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold {{ 'text-green-400' if is_valid else 'text-red-500' }}">
+                    {{ 'Blockchain is Secure' if is_valid else 'TAMPERING DETECTED!' }}
+                </h2>
+                <p class="text-gray-300">
+                    {% if is_valid %}
+                    All cryptographic links are valid. No unauthorized modifications detected.
+                    {% else %}
+                    The cryptographic chain is broken. Data mismatch found at block index {{ invalid_index }}.
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        
+        <div class="bg-slate-900 p-4 rounded-lg font-mono text-sm text-gray-400">
+            > Initializing validation routine...<br>
+            > Verifying genesis block... OK<br>
+            > Recalculating SHA-256 hashes...<br>
+            > Checking previous_hash pointers...<br>
+            > <span class="{{ 'text-green-400' if is_valid else 'text-red-500 font-bold' }}">Status: {{ 'VERIFIED' if is_valid else 'FAILED at index ' ~ invalid_index }}</span>
+        </div>
+    </div>
+
+    <!-- Academic Tamper Demo -->
+    <div class="glass p-8 rounded-xl border border-yellow-500/30">
+        <h3 class="text-xl font-bold text-yellow-400 mb-2"><i class="fas fa-graduation-cap"></i> Academic Demo: Simulate Tampering</h3>
+        <p class="text-gray-300 text-sm mb-6">
+            This tool intentionally corrupts a block's data directly in the database without recalculating the hash. 
+            This breaks the blockchain, allowing you to demonstrate how the system detects unauthorized modifications.
+        </p>
+        
+        <form method="POST" action="{{ url_for('admin.simulate_tamper') }}">
+            <button type="submit" class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-6 rounded-lg transition duration-300">
+                <i class="fas fa-biohazard"></i> Inject Tampered Data
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

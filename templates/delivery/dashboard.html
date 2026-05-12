@@ -1,0 +1,61 @@
+{% extends 'base/delivery_base.html' %}
+{% block delivery_content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-white">Assigned Deliveries</h1>
+    <p class="text-zinc-400">Navigate to your next warehouse drops</p>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="space-y-4">
+        {% for s in shipments %}
+        <div class="glass p-5 rounded-xl border border-zinc-700 hover:border-emerald-500 transition">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-lg font-bold font-mono text-emerald-400">{{ s.shipment_id }}</h3>
+                <span class="bg-zinc-800 px-2 py-1 rounded text-xs text-white">{{ s.status }}</span>
+            </div>
+            <div class="flex items-center text-sm text-zinc-300 mb-2">
+                <i class="fas fa-map-marker-alt w-5 text-zinc-500"></i>
+                <span>Current: <strong class="text-white">{{ s.current_location }}</strong></span>
+            </div>
+            <div class="flex items-center text-sm text-zinc-300">
+                <i class="fas fa-location-arrow w-5 text-blue-400"></i>
+                <span>Destination Sequence: <strong class="text-white">#{{ s.next_warehouse_sequence }}</strong></span>
+            </div>
+        </div>
+        {% endfor %}
+        {% if not shipments %}
+        <div class="glass p-8 text-center rounded-xl text-zinc-400">
+            No active deliveries assigned to you.
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="glass rounded-xl overflow-hidden h-[500px]" id="map">
+        <!-- Leaflet Map Injection -->
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var map = L.map('map').setView([20.5937, 78.9629], 5);
+        
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }).addTo(map);
+
+        const mapData = {{ map_data | tojson | safe }};
+        
+        if (mapData.length > 0) {
+            var bounds = [];
+            mapData.forEach(loc => {
+                L.marker([loc.lat, loc.lng]).addTo(map)
+                    .bindPopup(`<b>${loc.name}</b><br>Next stop for ${loc.shipment_id}`);
+                bounds.push([loc.lat, loc.lng]);
+            });
+            map.fitBounds(bounds, {padding: [50, 50]});
+        }
+    });
+</script>
+{% endblock %}

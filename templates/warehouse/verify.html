@@ -1,0 +1,26 @@
+{% extends 'base/warehouse_base.html' %}
+{% block warehouse_content %}
+<div class="flex items-center justify-center h-full">
+    <div class="glass p-8 rounded-xl max-w-lg w-full">
+        <h2 class="text-2xl font-bold mb-2">Verify Shipment</h2>
+        <p class="text-gray-400 mb-6 font-mono">{{ shipment.shipment_id }}</p>
+        
+        <div class="bg-stone-800 p-4 rounded-lg mb-6 border border-stone-700">
+            <p class="text-sm text-gray-400">Route Sequence</p>
+            <p class="font-bold text-lg text-orange-400">Expecting Stop #{{ shipment.next_warehouse_sequence }}</p>
+        </div>
+        
+        <form method="POST" class="space-y-4">
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Scan / Enter Your Warehouse ID</label>
+                <input type="text" name="warehouse_id" required placeholder="e.g. WH-A-102" class="w-full bg-stone-900 rounded p-3 text-white border border-stone-600 focus:border-orange-500 focus:outline-none text-lg font-mono">
+                <p class="text-xs text-gray-500 mt-2"><i class="fas fa-info-circle"></i> The blockchain will automatically verify if this warehouse is authorized in the original route path.</p>
+            </div>
+            
+            <button type="submit" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 shadow-lg shadow-orange-900/50">
+                <i class="fas fa-check-circle"></i> Authenticate & Verify Parcel
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
