@@ -47,12 +47,11 @@ def verify(shipment_id):
             
             next_rw = RouteWarehouse.query.filter_by(route_id=shipment.route_id, sequence_order=shipment.next_warehouse_sequence).first()
             if not next_rw:
-                shipment.status = 'Delivered'
+                # The package has reached the final warehouse. 
+                # It must now be delivered to the client by the Delivery Agent using the Hashlock PIN.
+                shipment.current_location = f"{wh.warehouse_name} (Ready for Delivery)"
                 db.session.commit()
                 sync_shipment_to_firebase(shipment)
-                blockchain.add_block(shipment_id, "DELIVERY_COMPLETED", {
-                    "message": "Shipment arrived at final destination"
-                })
         else:
             shipment.status = 'Suspicious'
             db.session.commit()

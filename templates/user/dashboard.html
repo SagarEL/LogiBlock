@@ -2,22 +2,22 @@
 {% block user_content %}
 <div class="flex flex-col items-center pt-20">
     <div class="text-center mb-12">
-        <h1 class="text-4xl font-bold text-blue-600 mb-4">LogiBlock Tracking</h1>
-        <p class="text-gray-500">Track your shipment in real-time, secured by blockchain</p>
+        <h1 class="text-4xl font-bold text-fuchsia-500 mb-4">LogiBlock Tracking</h1>
+        <p class="text-zinc-400">Track your shipment in real-time, secured by blockchain</p>
     </div>
     
-    <div class="bg-white p-8 rounded-2xl w-full max-w-2xl shadow-xl border border-gray-100">
+    <div class="bg-zinc-900 p-8 rounded-2xl w-full max-w-2xl shadow-[0_0_20px_rgba(217,70,239,0.15)] border border-zinc-800">
         <form method="POST" action="{{ url_for('user.track') }}" class="flex flex-col md:flex-row gap-4">
             <input type="text" name="shipment_id" required placeholder="Enter Tracking Number (e.g. SHP-A1B2C3D4)" 
-                   class="flex-1 bg-gray-50 rounded-lg p-4 text-slate-800 border border-gray-200 focus:border-blue-500 focus:outline-none text-lg font-mono">
-            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg transition shadow-md">
+                   class="flex-1 bg-zinc-800/50 rounded-lg p-4 text-zinc-100 border border-zinc-700 focus:border-fuchsia-500 focus:outline-none text-lg font-mono">
+            <button type="submit" class="bg-fuchsia-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg transition shadow-md">
                 Track Parcel <i class="fas fa-search ml-2"></i>
             </button>
         </form>
     </div>
     
     <div class="mt-16 text-center text-sm text-gray-400">
-        <p><i class="fas fa-shield-alt text-blue-400"></i> Every tracking event is cryptographically verified</p>
+        <p><i class="fas fa-shield-alt text-cyan-400"></i> Every tracking event is cryptographically verified</p>
     </div>
 </div>
 {% endblock %}

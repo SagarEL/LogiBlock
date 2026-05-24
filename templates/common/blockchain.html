@@ -6,46 +6,94 @@
     <p class="text-gray-400">Immutable record of all logistics operations</p>
 </div>
 
-<div class="space-y-6">
-    {% for block in chain %}
-    <div class="glass p-6 rounded-xl border border-slate-700 relative">
-        {% if not loop.first %}
-        <div class="absolute -top-6 left-1/2 w-0.5 h-6 bg-blue-500"></div>
-        <i class="fas fa-arrow-down absolute -top-3 left-1/2 transform -translate-x-1/2 text-blue-500"></i>
-        {% endif %}
-        
-        <div class="flex justify-between items-start mb-4">
-            <div>
-                <span class="bg-blue-900/50 text-blue-400 px-3 py-1 rounded-full text-sm font-bold">Block #{{ block.block_index }}</span>
-                <span class="ml-2 text-gray-400 text-sm"><i class="far fa-clock"></i> {{ block.timestamp }}</span>
-            </div>
-            <span class="bg-slate-700 px-2 py-1 rounded text-xs font-mono">{{ block.block_type }}</span>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-                <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Previous Hash</p>
-                <p class="text-xs font-mono text-gray-400 break-all bg-slate-900 p-2 rounded border border-slate-800">{{ block.previous_hash }}</p>
-            </div>
-            <div>
-                <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Current Hash</p>
-                <p class="text-xs font-mono text-emerald-400 break-all bg-slate-900 p-2 rounded border border-slate-800">{{ block.current_hash }}</p>
+<div class="mb-6 relative">
+    <input type="text" id="searchBar" onkeyup="filterLedger()" placeholder="Search by Shipment ID..." class="w-full bg-zinc-900 border border-zinc-700 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-cyan-400">
+    <i class="fas fa-search absolute right-4 top-4 text-gray-500"></i>
+</div>
+
+<div class="space-y-8" id="ledgerContainer">
+    {% for sid, blocks in grouped_chain.items() %}
+    <div class="shipment-group animate-slide-up">
+        <div class="flex justify-between items-center bg-zinc-900 p-4 rounded-xl border border-zinc-700 cursor-pointer hover:bg-zinc-800 transition" onclick="toggleGroup('{{ sid|replace(' ', '_') }}')">
+            <h2 class="text-xl font-bold font-mono text-fuchsia-400"><i class="fas fa-box mr-2"></i>{{ sid }}</h2>
+            <div class="flex items-center space-x-4">
+                <span class="text-xs text-gray-500 bg-zinc-950 px-2 py-1 rounded">{{ blocks|length }} Blocks</span>
+                <i class="fas fa-chevron-down text-gray-400 transition-transform" id="icon-{{ sid|replace(' ', '_') }}"></i>
             </div>
         </div>
         
-        <div class="bg-slate-900 p-4 rounded border border-slate-800">
-            <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-2">Payload Data</p>
-            <pre class="text-sm text-gray-300 font-mono whitespace-pre-wrap">{{ block.data }}</pre>
-            
-            {% if block.route_hash %}
-            <p class="text-xs text-gray-500 mt-2">Route Hash: <span class="text-purple-400">{{ block.route_hash }}</span></p>
-            {% endif %}
-            
-            {% if block.warehouse_id %}
-            <p class="text-xs text-gray-500 mt-1">Warehouse: <span class="text-blue-400">{{ block.warehouse_id }}</span></p>
-            {% endif %}
+        <div class="bg-[#09090b] p-6 rounded-b-xl border border-zinc-700 border-t-0 mt-[-8px] pt-8" id="group-{{ sid|replace(' ', '_') }}" style="display: none;">
+            <div class="space-y-6">
+                {% for block in blocks %}
+                <div class="glass p-6 rounded-xl border border-zinc-700 relative">
+                    {% if not loop.first %}
+                    <div class="absolute -top-6 left-1/2 w-0.5 h-6 bg-fuchsia-500"></div>
+                    <i class="fas fa-arrow-down absolute -top-3 left-1/2 transform -translate-x-1/2 text-cyan-400"></i>
+                    {% endif %}
+                    
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="bg-fuchsia-900/50 text-cyan-400 px-3 py-1 rounded-full text-sm font-bold">Block #{{ block.block_index }}</span>
+                            <span class="ml-2 text-gray-400 text-sm"><i class="far fa-clock"></i> {{ block.timestamp }}</span>
+                        </div>
+                        <span class="bg-zinc-700 px-2 py-1 rounded text-xs font-mono">{{ block.block_type }}</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <p class="text-xs text-zinc-400 font-bold uppercase tracking-wider mb-1">Previous Hash</p>
+                            <p class="text-xs font-mono text-gray-400 break-all bg-zinc-900 p-2 rounded border border-zinc-800">{{ block.previous_hash }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-zinc-400 font-bold uppercase tracking-wider mb-1">Current Hash</p>
+                            <p class="text-xs font-mono text-emerald-400 break-all bg-zinc-900 p-2 rounded border border-zinc-800">{{ block.current_hash }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-zinc-900 p-4 rounded border border-zinc-800">
+                        <p class="text-xs text-zinc-400 font-bold uppercase tracking-wider mb-2">Payload Data</p>
+                        <pre class="text-sm text-gray-300 font-mono whitespace-pre-wrap">{{ block.data }}</pre>
+                        
+                        {% if block.route_hash %}
+                        <p class="text-xs text-zinc-400 mt-2">Route Hash: <span class="text-fuchsia-400">{{ block.route_hash }}</span></p>
+                        {% endif %}
+                        
+                        {% if block.warehouse_id %}
+                        <p class="text-xs text-zinc-400 mt-1">Warehouse: <span class="text-cyan-400">{{ block.warehouse_id }}</span></p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
     {% endfor %}
 </div>
+
+<script>
+function toggleGroup(sid) {
+    const group = document.getElementById('group-' + sid);
+    const icon = document.getElementById('icon-' + sid);
+    if (group.style.display === 'none' || group.style.display === '') {
+        group.style.display = 'block';
+        icon.style.transform = 'rotate(-180deg)';
+    } else {
+        group.style.display = 'none';
+        icon.style.transform = 'rotate(0deg)';
+    }
+}
+
+function filterLedger() {
+    const input = document.getElementById('searchBar').value.toUpperCase();
+    const groups = document.getElementsByClassName('shipment-group');
+    for (let i = 0; i < groups.length; i++) {
+        const title = groups[i].getElementsByTagName("h2")[0];
+        if (title.innerText.toUpperCase().indexOf(input) > -1) {
+            groups[i].style.display = "";
+        } else {
+            groups[i].style.display = "none";
+        }
+    }
+}
+</script>
 {% endblock %}

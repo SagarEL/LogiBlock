@@ -8,7 +8,7 @@
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
     <div class="space-y-4">
         {% for s in shipments %}
-        <div class="glass p-5 rounded-xl border border-zinc-700 hover:border-emerald-500 transition">
+        <div id="card-{{ s.shipment_id }}" onclick="selectShipment('{{ s.shipment_id }}')" class="glass p-5 rounded-xl border border-zinc-700 hover:border-emerald-500 transition cursor-pointer">
             <div class="flex justify-between items-center mb-3">
                 <h3 class="text-lg font-bold font-mono text-emerald-400">{{ s.shipment_id }}</h3>
                 <span class="bg-zinc-800 px-2 py-1 rounded text-xs text-white">{{ s.status }}</span>
@@ -17,10 +17,21 @@
                 <i class="fas fa-map-marker-alt w-5 text-zinc-500"></i>
                 <span>Current: <strong class="text-white">{{ s.current_location }}</strong></span>
             </div>
-            <div class="flex items-center text-sm text-zinc-300">
-                <i class="fas fa-location-arrow w-5 text-blue-400"></i>
+            <div class="flex items-center text-sm text-zinc-300 mb-4">
+                <i class="fas fa-location-arrow w-5 text-cyan-400"></i>
                 <span>Destination Sequence: <strong class="text-white">#{{ s.next_warehouse_sequence }}</strong></span>
             </div>
+            
+            {% if s.status != 'Delivered' %}
+            <div class="mt-4 pt-4 border-t border-zinc-700/50" onclick="event.stopPropagation();">
+                <form action="{{ url_for('delivery.finalize_delivery', shipment_id=s.shipment_id) }}" method="POST" class="flex gap-2">
+                    <input type="text" name="pin" required placeholder="Enter Client PIN" class="flex-1 bg-zinc-900 border border-zinc-600 rounded px-3 py-2 text-white text-sm focus:border-emerald-500 focus:outline-none">
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded text-sm font-bold transition flex items-center shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 transform hover:-translate-y-0.5">
+                        <i class="fas fa-check-circle mr-1"></i> Finalize
+                    </button>
+                </form>
+            </div>
+            {% endif %}
         </div>
         {% endfor %}
         {% if not shipments %}
@@ -37,25 +48,192 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        var map = L.map('map').setView([20.5937, 78.9629], 5);
-        
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap',
-            subdomains: 'abcd',
-            maxZoom: 20
-        }).addTo(map);
+    // Initialize map
+    var map = L.map('map').setView([20.5937, 78.9629], 5);
+    
+    // Add dark mode layer
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap &copy; CartoDB',
+        maxZoom: 20
+    }).addTo(map);
 
-        const mapData = {{ map_data | tojson | safe }};
-        
-        if (mapData.length > 0) {
-            var bounds = [];
-            mapData.forEach(loc => {
-                L.marker([loc.lat, loc.lng]).addTo(map)
-                    .bindPopup(`<b>${loc.name}</b><br>Next stop for ${loc.shipment_id}`);
-                bounds.push([loc.lat, loc.lng]);
+    const shipments = {{ shipments_data | tojson | safe }};
+    let currentFeatures = [];
+    let animationTimeoutId = null;
+    
+    // Draw next stop marker for all shipments by default
+    const defaultMarkers = {};
+    shipments.forEach(s => {
+        const nextStop = s.path.find(w => w.sequence === s.next_sequence);
+        if (nextStop) {
+            const markerHtml = `
+                <div style="background-color: #f59e0b; width: 12px; height: 12px; border: 2.5px solid white; border-radius: 50%; box-shadow: 0 0 8px #f59e0b;"></div>
+            `;
+            const icon = L.divIcon({
+                html: markerHtml,
+                className: 'next-stop-marker',
+                iconSize: [12, 12],
+                iconAnchor: [6, 6]
             });
-            map.fitBounds(bounds, {padding: [50, 50]});
+            const m = L.marker([nextStop.lat, nextStop.lng], { icon: icon })
+                .addTo(map)
+                .bindPopup(`<b>Shipment: ${s.shipment_id}</b><br>Next Stop: ${nextStop.name}`);
+            defaultMarkers[s.shipment_id] = m;
         }
     });
+
+    // Handle shipment selection
+    window.selectShipment = function(shipmentId) {
+        // Clear any running animation timeouts
+        if (animationTimeoutId) clearTimeout(animationTimeoutId);
+        
+        // Remove active class from all cards
+        document.querySelectorAll('[id^="card-"]').forEach(card => {
+            card.classList.remove('border-fuchsia-500', 'bg-zinc-800/80');
+            card.classList.add('border-slate-800', 'bg-zinc-900/50');
+        });
+
+        // Add active class to selected card
+        const card = document.getElementById(`card-${shipmentId}`);
+        if (card) {
+            card.classList.remove('border-slate-800', 'bg-zinc-900/50');
+            card.classList.add('border-fuchsia-500', 'bg-zinc-800/80');
+        }
+
+        // Close default popups if open
+        if (defaultMarkers[shipmentId]) {
+            defaultMarkers[shipmentId].closePopup();
+        }
+
+        // Clear previous drawing features
+        currentFeatures.forEach(layer => map.removeLayer(layer));
+        currentFeatures = [];
+
+        // Find selected shipment details
+        const s = shipments.find(item => item.shipment_id === shipmentId);
+        if (!s || s.path.length === 0) return;
+
+        const latlngs = s.path.map(w => [w.lat, w.lng]);
+        
+        // 1. Draw dashed route track
+        const routeLine = L.polyline(latlngs, {
+            color: '#64748b',
+            dashArray: '4, 8',
+            weight: 3,
+            opacity: 0.8
+        }).addTo(map);
+        currentFeatures.push(routeLine);
+        
+        // 2. Draw solid line up to current leg
+        const visitedLatlngs = [];
+        s.path.forEach(w => {
+            if (w.sequence < s.next_sequence || s.status === 'Delivered') {
+                visitedLatlngs.push([w.lat, w.lng]);
+            }
+        });
+        
+        if (visitedLatlngs.length > 1) {
+            const visitedLine = L.polyline(visitedLatlngs, {
+                color: '#10b981',
+                weight: 4,
+                opacity: 0.9
+            }).addTo(map);
+            currentFeatures.push(visitedLine);
+        }
+
+        // 3. Draw stops
+        s.path.forEach(w => {
+            const isVisited = w.sequence < s.next_sequence || s.status === 'Delivered';
+            const isNext = w.sequence === s.next_sequence && s.status !== 'Delivered';
+            
+            let markerColor = '#475569'; // pending (slate)
+            if (isVisited) markerColor = '#10b981'; // verified (green)
+            else if (isNext) markerColor = '#f59e0b'; // next stop (amber)
+            
+            const markerHtml = `
+                <div style="background-color: ${markerColor}; width: 14px; height: 14px; border: 2.5px solid #1e293b; border-radius: 50%; box-shadow: 0 0 8px ${markerColor}aa;"></div>
+            `;
+            
+            const icon = L.divIcon({
+                html: markerHtml,
+                className: 'custom-warehouse-marker',
+                iconSize: [14, 14],
+                iconAnchor: [7, 7]
+            });
+            
+            const stopMarker = L.marker([w.lat, w.lng], { icon: icon })
+                .addTo(map)
+                .bindPopup(`<b>Stop #${w.sequence}: ${w.name}</b><br>Code: ${w.code}<br>Status: ${isVisited ? 'Verified' : isNext ? 'Expecting Next' : 'Pending'}`);
+            currentFeatures.push(stopMarker);
+        });
+
+        // 4. Animate glowing delivery marker
+        let activeLegStart = null;
+        let activeLegEnd = null;
+        
+        if (s.status === 'In Transit' && s.next_sequence > 1) {
+            activeLegStart = s.path.find(w => w.sequence === s.next_sequence - 1);
+            activeLegEnd = s.path.find(w => w.sequence === s.next_sequence);
+        } else if (s.status === 'In Transit' && s.path.length > 1) {
+            activeLegStart = s.path[0];
+            activeLegEnd = s.path[1];
+        }
+
+        const truckIconHtml = `
+            <div class="relative flex items-center justify-center">
+                <div class="animate-ping absolute inline-flex h-8 w-8 rounded-full bg-fuchsia-500 opacity-60"></div>
+                <div class="relative inline-flex rounded-full bg-fuchsia-600 border border-white text-white flex items-center justify-center" style="width: 22px; height: 22px; box-shadow: 0 0 10px #3b82f6;">
+                    <i class="fas fa-truck text-[10px]"></i>
+                </div>
+            </div>
+        `;
+        const truckIcon = L.divIcon({
+            html: truckIconHtml,
+            className: 'truck-pulse',
+            iconSize: [22, 22],
+            iconAnchor: [11, 11]
+        });
+
+        if (activeLegStart && activeLegEnd) {
+            const animatingMarker = L.marker([activeLegStart.lat, activeLegStart.lng], { icon: truckIcon }).addTo(map);
+            currentFeatures.push(animatingMarker);
+            
+            let progress = 0;
+            let direction = 1;
+            
+            function step() {
+                progress += 0.003 * direction;
+                if (progress >= 1.0) {
+                    progress = 1.0;
+                    direction = -1;
+                } else if (progress <= 0.0) {
+                    progress = 0.0;
+                    direction = 1;
+                }
+                
+                const currentLat = activeLegStart.lat + (activeLegEnd.lat - activeLegStart.lat) * progress;
+                const currentLng = activeLegStart.lng + (activeLegEnd.lng - activeLegStart.lng) * progress;
+                
+                animatingMarker.setLatLng([currentLat, currentLng]);
+                animationTimeoutId = setTimeout(step, 30);
+            }
+            step();
+        } else {
+            let staticCoords = null;
+            if (s.status === 'Delivered') {
+                staticCoords = [s.path[s.path.length - 1].lat, s.path[s.path.length - 1].lng];
+            } else {
+                staticCoords = [s.path[0].lat, s.path[0].lng];
+            }
+            
+            const staticMarker = L.marker(staticCoords, { icon: truckIcon }).addTo(map);
+            currentFeatures.push(staticMarker);
+        }
+
+        // Zoom to fit bounds
+        const bounds = L.latLngBounds(latlngs);
+        map.fitBounds(bounds, { padding: [50, 50] });
+    }
+});
 </script>
 {% endblock %}

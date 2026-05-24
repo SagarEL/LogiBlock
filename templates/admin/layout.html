@@ -4,16 +4,16 @@
     <!-- Sidebar -->
     <aside class="w-64 glass h-full flex flex-col hidden md:flex">
         <div class="p-6">
-            <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">LogiBlock Admin</h2>
+            <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-fuchsia-500 to-purple-400">LogiBlock Admin</h2>
         </div>
         <nav class="flex-1 px-4 space-y-2 overflow-y-auto">
-            <a href="{{ url_for('admin.dashboard') }}" class="block px-4 py-3 rounded-lg hover:bg-slate-700 transition"><i class="fas fa-home w-6"></i> Dashboard</a>
-            <a href="{{ url_for('admin.warehouses') }}" class="block px-4 py-3 rounded-lg hover:bg-slate-700 transition"><i class="fas fa-warehouse w-6"></i> Warehouses</a>
-            <a href="{{ url_for('admin.routes') }}" class="block px-4 py-3 rounded-lg hover:bg-slate-700 transition"><i class="fas fa-route w-6"></i> Routes</a>
-            <a href="{{ url_for('admin.shipments') }}" class="block px-4 py-3 rounded-lg hover:bg-slate-700 transition"><i class="fas fa-box w-6"></i> Shipments</a>
-            <a href="{{ url_for('admin.users') }}" class="block px-4 py-3 rounded-lg hover:bg-slate-700 transition"><i class="fas fa-users w-6"></i> Users</a>
-            <a href="{{ url_for('admin.view_blockchain') }}" class="block px-4 py-3 rounded-lg hover:bg-slate-700 transition"><i class="fas fa-link w-6"></i> Ledger</a>
-            <a href="{{ url_for('admin.validate') }}" class="block px-4 py-3 rounded-lg hover:bg-slate-700 transition text-red-400"><i class="fas fa-shield-alt w-6"></i> Security</a>
+            <a href="{{ url_for('admin.dashboard') }}" class="block px-4 py-3 rounded-lg hover:bg-zinc-700 transition"><i class="fas fa-home w-6"></i> Dashboard</a>
+            <a href="{{ url_for('admin.warehouses') }}" class="block px-4 py-3 rounded-lg hover:bg-zinc-700 transition"><i class="fas fa-warehouse w-6"></i> Warehouses</a>
+            <a href="{{ url_for('admin.routes') }}" class="block px-4 py-3 rounded-lg hover:bg-zinc-700 transition"><i class="fas fa-route w-6"></i> Routes</a>
+            <a href="{{ url_for('admin.shipments') }}" class="block px-4 py-3 rounded-lg hover:bg-zinc-700 transition"><i class="fas fa-box w-6"></i> Shipments</a>
+            <a href="{{ url_for('admin.users') }}" class="block px-4 py-3 rounded-lg hover:bg-zinc-700 transition"><i class="fas fa-users w-6"></i> Users</a>
+            <a href="{{ url_for('admin.view_blockchain') }}" class="block px-4 py-3 rounded-lg hover:bg-zinc-700 transition"><i class="fas fa-link w-6"></i> Ledger</a>
+            <a href="{{ url_for('admin.validate') }}" class="block px-4 py-3 rounded-lg hover:bg-zinc-700 transition text-red-400"><i class="fas fa-shield-alt w-6"></i> Security</a>
         </nav>
         <div class="p-4 border-t border-slate-700">
             <a href="{{ url_for('auth.logout') }}" class="block px-4 py-2 text-center rounded-lg bg-red-600 hover:bg-red-700 transition"><i class="fas fa-sign-out-alt"></i> Logout</a>
@@ -21,7 +21,7 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 h-full overflow-y-auto bg-slate-900 p-8">
+    <main class="flex-1 h-full overflow-y-auto bg-zinc-900 p-8">
         {% block admin_content %}{% endblock %}
     </main>
 </div>

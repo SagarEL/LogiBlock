@@ -1,53 +1,167 @@
 {% extends 'base/admin_base.html' %}
 
 {% block admin_content %}
-<div class="mb-8">
-    <h1 class="text-3xl font-bold">Security & Validation</h1>
-    <p class="text-gray-400">Verify the cryptographic integrity of the entire supply chain network.</p>
+<div class="mb-8 flex justify-between items-center">
+    <div>
+        <h1 class="text-3xl font-bold">Security & Validation</h1>
+        <p class="text-gray-400">Verify the cryptographic integrity of the entire supply chain network.</p>
+    </div>
 </div>
 
-<div class="max-w-3xl">
-    <div class="glass p-8 rounded-xl mb-8 border {{ 'border-green-500/50' if is_valid else 'border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.5)]' }}">
-        <div class="flex items-center space-x-4 mb-6">
-            <div class="w-16 h-16 rounded-full flex items-center justify-center {{ 'bg-green-900 text-green-400' if is_valid else 'bg-red-900 text-red-500 animate-pulse' }}">
-                <i class="fas {{ 'fa-shield-check text-3xl' if is_valid else 'fa-exclamation-triangle text-3xl' }}"></i>
-            </div>
-            <div>
-                <h2 class="text-2xl font-bold {{ 'text-green-400' if is_valid else 'text-red-500' }}">
-                    {{ 'Blockchain is Secure' if is_valid else 'TAMPERING DETECTED!' }}
-                </h2>
-                <p class="text-gray-300">
-                    {% if is_valid %}
-                    All cryptographic links are valid. No unauthorized modifications detected.
-                    {% else %}
-                    The cryptographic chain is broken. Data mismatch found at block index {{ invalid_index }}.
-                    {% endif %}
-                </p>
-            </div>
-        </div>
+<!-- Ledger Visual Chain -->
+<h3 class="text-lg font-semibold mb-4 text-slate-300"><i class="fas fa-network-wired mr-2"></i> Chain Integrity Status Map</h3>
+<div class="flex items-center space-x-4 overflow-x-auto pb-6 mb-8 bg-zinc-900/50 p-6 rounded-xl border border-slate-800">
+    {% for block in chain %}
+    <div class="flex-shrink-0 flex items-center">
+        {% if not loop.first %}
+        <div class="w-8 h-0.5 bg-zinc-700 mx-2 flex-shrink-0"></div>
+        {% endif %}
         
-        <div class="bg-slate-900 p-4 rounded-lg font-mono text-sm text-gray-400">
-            > Initializing validation routine...<br>
-            > Verifying genesis block... OK<br>
-            > Recalculating SHA-256 hashes...<br>
-            > Checking previous_hash pointers...<br>
-            > <span class="{{ 'text-green-400' if is_valid else 'text-red-500 font-bold' }}">Status: {{ 'VERIFIED' if is_valid else 'FAILED at index ' ~ invalid_index }}</span>
+        <div class="flex-shrink-0 p-4 rounded-xl border-2 transition-all duration-300
+            {% if not is_valid and block.block_index >= invalid_index %}
+                {% if block.block_index == invalid_index %}
+                    border-red-500 bg-red-950/40 shadow-[0_0_15px_rgba(239,68,68,0.6)] animate-pulse
+                {% else %}
+                    border-red-800/60 bg-zinc-900/60
+                {% endif %}
+            {% else %}
+                border-emerald-500/50 bg-emerald-950/20
+            {% endif %}">
+            <div class="flex items-center justify-between space-x-4 mb-2">
+                <span class="text-xs font-mono px-2 py-0.5 rounded font-bold
+                    {% if not is_valid and block.block_index >= invalid_index %}
+                        bg-red-900/50 text-red-400
+                    {% else %}
+                        bg-emerald-900/50 text-emerald-400
+                    {% endif %}">
+                    Block #{{ block.block_index }}
+                </span>
+                <i class="fas {% if not is_valid and block.block_index >= invalid_index %}fa-chain-broken text-red-500{% else %}fa-link text-emerald-400{% endif %}"></i>
+            </div>
+            <p class="text-[10px] text-gray-400 font-mono truncate w-28">{{ block.block_type }}</p>
+            <p class="text-[9px] text-zinc-400 font-mono mt-1 break-all w-28">{{ block.current_hash[:12] }}...</p>
         </div>
     </div>
+    {% endfor %}
+</div>
 
-    <!-- Academic Tamper Demo -->
-    <div class="glass p-8 rounded-xl border border-yellow-500/30">
-        <h3 class="text-xl font-bold text-yellow-400 mb-2"><i class="fas fa-graduation-cap"></i> Academic Demo: Simulate Tampering</h3>
-        <p class="text-gray-300 text-sm mb-6">
-            This tool intentionally corrupts a block's data directly in the database without recalculating the hash. 
-            This breaks the blockchain, allowing you to demonstrate how the system detects unauthorized modifications.
-        </p>
-        
-        <form method="POST" action="{{ url_for('admin.simulate_tamper') }}">
-            <button type="submit" class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-6 rounded-lg transition duration-300">
-                <i class="fas fa-biohazard"></i> Inject Tampered Data
-            </button>
-        </form>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="lg:col-span-2 space-y-6">
+        <!-- Main Status Card -->
+        <div class="glass p-8 rounded-xl border {{ 'border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.1)]' if is_valid else 'border-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.2)]' }}">
+            <div class="flex items-center space-x-4 mb-6">
+                <div class="w-16 h-16 rounded-full flex items-center justify-center {{ 'bg-emerald-950 border border-emerald-500/50 text-emerald-400' if is_valid else 'bg-red-950 border border-red-500/50 text-red-500 animate-pulse' }}">
+                    <i class="fas {{ 'fa-shield-check text-3xl' if is_valid else 'fa-exclamation-triangle text-3xl' }}"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold {{ 'text-emerald-400' if is_valid else 'text-red-500' }}">
+                        {{ 'Blockchain is Secure' if is_valid else 'TAMPERING DETECTED!' }}
+                    </h2>
+                    <p class="text-gray-300 text-sm">
+                        {% if is_valid %}
+                        All cryptographic links are valid. No unauthorized database modifications detected.
+                        {% else %}
+                        The cryptographic chain is broken. Data mismatch found at block index {{ invalid_index }}.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            
+            <div class="bg-zinc-900 p-4 rounded-lg font-mono text-xs text-gray-400 space-y-1">
+                <p>> Initializing validation routine...</p>
+                <p>> Verifying genesis block... <span class="text-emerald-400">OK</span></p>
+                <p>> Recalculating SHA-256 hashes...</p>
+                <p>> Checking previous_hash pointers...</p>
+                <p>> <span class="{{ 'text-emerald-400' if is_valid else 'text-red-500 font-bold' }}">Status: {{ 'VERIFIED' if is_valid else 'FAILED at index ' ~ invalid_index }}</span></p>
+            </div>
+        </div>
+
+        <!-- Anatomy of Tampering Side-by-Side Analysis -->
+        {% if broken_block_info %}
+        <div class="glass p-6 rounded-xl border border-red-500/40 shadow-[0_0_20px_rgba(239,68,68,0.1)]">
+            <h3 class="text-lg font-bold text-red-400 mb-2 flex items-center"><i class="fas fa-heart-crack mr-2"></i> Anatomy of Tampering</h3>
+            <p class="text-gray-400 text-xs mb-6">
+                Block #{{ broken_block_info.block_index }} data has been altered directly in SQLite.
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <!-- Stored state -->
+                <div class="bg-red-950/10 border border-red-900/30 rounded-lg p-4">
+                    <h4 class="font-bold text-red-400 text-sm mb-3 flex items-center"><i class="fas fa-database mr-2"></i> SQLite Block (Corrupted)</h4>
+                    <div class="space-y-3">
+                        <div>
+                            <span class="text-[10px] text-zinc-400 uppercase font-semibold">Stored Hash</span>
+                            <code class="text-[10px] font-mono break-all text-red-400 block bg-[#09090b] p-2 rounded mt-1 border border-red-900/20">{{ broken_block_info.stored_hash }}</code>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-zinc-400 uppercase font-semibold">Recomputed Hash (from data)</span>
+                            <code class="text-[10px] font-mono break-all text-red-500 block bg-[#09090b] p-2 rounded mt-1 border border-red-900/40 font-bold animate-pulse">{{ broken_block_info.recalculated_hash }}</code>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-zinc-400 uppercase font-semibold">Stored Data Payload</span>
+                            <pre class="text-[10px] font-mono bg-[#09090b] p-2.5 rounded mt-1 border border-red-900/10 text-gray-300 whitespace-pre-wrap overflow-x-auto">{{ broken_block_info.stored_data }}</pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Cloud state -->
+                <div class="bg-emerald-950/5 border border-emerald-900/20 rounded-lg p-4">
+                    <h4 class="font-bold text-emerald-400 text-sm mb-3 flex items-center"><i class="fas fa-cloud mr-2"></i> Firestore Backup (Authentic)</h4>
+                    {% if broken_block_info.authentic_hash %}
+                    <div class="space-y-3">
+                        <div>
+                            <span class="text-[10px] text-zinc-400 uppercase font-semibold">Cloud Verified Hash</span>
+                            <code class="text-[10px] font-mono break-all text-emerald-400 block bg-[#09090b] p-2 rounded mt-1 border border-emerald-900/20">{{ broken_block_info.authentic_hash }}</code>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-zinc-400 uppercase font-semibold">Integrity Verdict</span>
+                            <code class="text-[10px] font-mono block bg-[#09090b] p-2 rounded mt-1 border border-emerald-900/20 text-emerald-400 font-bold">MATCHES ORIGINAL CHAIN INTENT</code>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-zinc-400 uppercase font-semibold">Cloud Data Payload</span>
+                            <pre class="text-[10px] font-mono bg-[#09090b] p-2.5 rounded mt-1 border border-emerald-900/10 text-gray-300 whitespace-pre-wrap overflow-x-auto">{{ broken_block_info.authentic_data }}</pre>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="h-full flex flex-col items-center justify-center text-center p-4">
+                        <i class="fas fa-cloud-slash text-zinc-300 text-2xl mb-2"></i>
+                        <p class="text-[10px] text-gray-400">Could not retrieve cloud backup. Make sure Firebase is active.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Self Healing Trigger -->
+            <div class="bg-zinc-900/60 p-4 rounded-lg border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="text-left">
+                    <h4 class="font-semibold text-slate-200 text-sm">Restoration & Self-Healing</h4>
+                    <p class="text-[10px] text-slate-400">Poll cloud backups to overwrite corrupted SQLite database cells.</p>
+                </div>
+                <form method="POST" action="{{ url_for('admin.restore_integrity') }}">
+                    <button type="submit" class="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 text-xs flex items-center shadow-lg shadow-green-900/30">
+                        <i class="fas fa-heart-pulse mr-2"></i> Restore Integrity (Self-Heal)
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Sidebar controls -->
+    <div class="space-y-6">
+        <!-- Academic Tamper Demo -->
+        <div class="glass p-6 rounded-xl border border-yellow-500/20 bg-yellow-950/5">
+            <h3 class="text-lg font-bold text-yellow-400 mb-2 flex items-center"><i class="fas fa-graduation-cap mr-2"></i> Tampering Simulation</h3>
+            <p class="text-gray-400 text-xs mb-6 leading-relaxed">
+                This academic tool corrupts a block's data directly in SQLite without recalculating the hash. This simulates malicious attacks.
+            </p>
+            
+            <form method="POST" action="{{ url_for('admin.simulate_tamper') }}">
+                <button type="submit" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 flex items-center justify-center gap-2">
+                    <i class="fas fa-biohazard text-lg"></i> Inject Tampered Data
+                </button>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}

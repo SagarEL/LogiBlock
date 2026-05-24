@@ -22,16 +22,16 @@
             </div>
         {% endif %}
 
-        <div class="p-6 bg-slate-900/50 rounded-xl border border-slate-800 text-left">
-            <h3 class="font-bold text-lg mb-4 flex items-center"><i class="fa-solid fa-microchip text-blue-500 mr-2"></i> How Validation Works</h3>
+        <div class="p-6 bg-zinc-900/50 rounded-xl border border-slate-800 text-left">
+            <h3 class="font-bold text-lg mb-4 flex items-center"><i class="fa-solid fa-microchip text-cyan-400 mr-2"></i> How Validation Works</h3>
             <p class="text-sm text-slate-400 mb-4">The system traverses the entire blockchain and performs two critical checks on every block:</p>
             <ul class="space-y-3 text-sm text-slate-300">
                 <li class="flex items-start">
-                    <i class="fa-solid fa-check text-blue-500 mt-1 mr-3"></i>
+                    <i class="fa-solid fa-check text-cyan-400 mt-1 mr-3"></i>
                     <span><strong>Data Integrity:</strong> Recalculates the SHA-256 hash of the block's current data and compares it to the stored hash.</span>
                 </li>
                 <li class="flex items-start">
-                    <i class="fa-solid fa-check text-blue-500 mt-1 mr-3"></i>
+                    <i class="fa-solid fa-check text-cyan-400 mt-1 mr-3"></i>
                     <span><strong>Chain Continuity:</strong> Verifies that the block's `previous_hash` exactly matches the `current_hash` of the preceding block.</span>
                 </li>
             </ul>

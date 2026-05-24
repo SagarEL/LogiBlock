@@ -7,9 +7,9 @@
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for s in shipments %}
-    <div class="glass p-6 rounded-xl border-l-4 {{ 'border-yellow-500' if s.status == 'In Transit' else 'border-blue-500' }}">
+    <div class="glass p-6 rounded-xl border-l-4 {{ 'border-yellow-500' if s.status == 'In Transit' else 'border-fuchsia-500' }}">
         <div class="flex justify-between items-start mb-4">
-            <h3 class="text-xl font-bold font-mono text-blue-400">{{ s.shipment_id }}</h3>
+            <h3 class="text-xl font-bold font-mono text-cyan-400">{{ s.shipment_id }}</h3>
             <span class="bg-stone-700 px-2 py-1 rounded text-xs">{{ s.status }}</span>
         </div>
         <p class="text-sm text-gray-300 mb-2">From: {{ s.sender }} <br> To: {{ s.receiver }}</p>

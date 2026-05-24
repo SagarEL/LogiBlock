@@ -5,18 +5,18 @@
     body { background-color: #f8fafc; color: #1e293b; }
 </style>
 <div class="flex h-screen overflow-hidden">
-    <aside class="w-64 bg-white border-r border-gray-200 h-full flex flex-col text-slate-800">
-        <div class="p-6 bg-gray-50 border-b border-gray-200">
-            <h2 class="text-2xl font-bold text-blue-600">Client Portal</h2>
+    <aside class="w-64 bg-zinc-900 border-r border-zinc-700 h-full flex flex-col text-zinc-100">
+        <div class="p-6 bg-zinc-800/50 border-b border-zinc-700">
+            <h2 class="text-2xl font-bold text-fuchsia-500">Client Portal</h2>
         </div>
         <nav class="flex-1 px-4 py-4 space-y-2">
-            <a href="{{ url_for('user.dashboard') }}" class="block px-4 py-3 rounded text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition font-medium"><i class="fas fa-search-location w-6"></i> Track Parcel</a>
+            <a href="{{ url_for('user.dashboard') }}" class="block px-4 py-3 rounded text-zinc-400 hover:bg-blue-50 hover:text-fuchsia-500 transition font-medium"><i class="fas fa-search-location w-6"></i> Track Parcel</a>
         </nav>
-        <div class="p-4 bg-gray-50 border-t border-gray-200">
+        <div class="p-4 bg-zinc-800/50 border-t border-zinc-700">
             <a href="{{ url_for('auth.logout') }}" class="block px-4 py-2 text-center rounded border border-gray-300 hover:bg-gray-100 transition text-gray-700 font-bold"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
     </aside>
-    <main class="flex-1 h-full overflow-y-auto bg-gray-50 p-8 text-slate-800">
+    <main class="flex-1 h-full overflow-y-auto bg-zinc-800/50 p-8 text-zinc-100">
         {% block user_content %}{% endblock %}
     </main>
 </div>

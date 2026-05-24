@@ -51,6 +51,8 @@ class Shipment(db.Model):
     eta = db.Column(db.String(50), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     next_warehouse_sequence = db.Column(db.Integer, default=1)
+    delivery_pin = db.Column(db.String(10), nullable=True)
+    delivery_pin_hash = db.Column(db.String(64), nullable=True)
     
     route = db.relationship('Route')
     agent = db.relationship('User', foreign_keys=[delivery_agent_id])

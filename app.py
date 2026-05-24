@@ -43,12 +43,14 @@ def create_app():
         
     with app.app_context():
         db.create_all()
-        # Seed users
+        # Seed users with realistic names
         roles_to_seed = [
-            ('admin', 'admin123', 'admin'),
-            ('warehouse1', 'warehouse123', 'warehouse'),
-            ('delivery1', 'delivery123', 'delivery'),
-            ('user1', 'user123', 'user')
+            ('admin', 'admin123', 'Admin'),
+            ('Rajesh Patel (Mumbai WH)', 'pass123', 'Warehouse'),
+            ('Sarah Connor (Delhi WH)', 'pass123', 'Warehouse'),
+            ('John Doe', 'pass123', 'Delivery'),
+            ('Michael Johnson', 'pass123', 'Delivery'),
+            ('Alice Smith', 'pass123', 'user')
         ]
         for u, p, r in roles_to_seed:
             if not User.query.filter_by(username=u).first():

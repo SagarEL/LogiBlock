@@ -33,3 +33,38 @@ def sync_shipment_to_firebase(shipment):
         
     except Exception as e:
         print(f"❌ Failed to sync shipment {shipment.shipment_id} to Firebase: {e}")
+
+def sync_block_to_firebase(block):
+    """
+    Syncs a blockchain block to Firebase Firestore.
+    This creates an offsite immutable audit trail for self-healing.
+    """
+    db = get_db()
+    if not db:
+        print("Firebase not initialized. Skipping block sync.")
+        return
+        
+    try:
+        from firebase_admin import firestore
+        
+        block_data = {
+            'block_index': block.block_index,
+            'shipment_id': block.shipment_id,
+            'block_type': block.block_type,
+            'warehouse_id': block.warehouse_id,
+            'data': block.data,
+            'previous_hash': block.previous_hash,
+            'current_hash': block.current_hash,
+            'route_hash': block.route_hash,
+            'verification_status': block.verification_status,
+            'digital_proof_hash': block.digital_proof_hash,
+            'timestamp': block.timestamp,
+            'synced_at': firestore.SERVER_TIMESTAMP
+        }
+        
+        doc_ref = db.collection('blocks').document(str(block.block_index))
+        doc_ref.set(block_data, merge=True)
+        print(f"✅ Successfully synced Block #{block.block_index} to Firebase!")
+        
+    except Exception as e:
+        print(f"❌ Failed to sync block #{block.block_index} to Firebase: {e}")
