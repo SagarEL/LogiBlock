@@ -110,9 +110,6 @@ def shipments():
         db.session.add(shipment)
         db.session.commit()
         
-        from firebase_sync import sync_shipment_to_firebase
-        sync_shipment_to_firebase(shipment)
-        
         import qrcode, os
         from config import Config
         qr = qrcode.QRCode(version=1, box_size=10, border=5)
@@ -243,21 +240,6 @@ def validate():
                 broken_block.warehouse_id,
                 broken_block.route_hash
             )
-            
-            from firebase_config import get_db
-            db_fs = get_db()
-            authentic_data = None
-            authentic_hash = None
-            if db_fs:
-                try:
-                    doc = db_fs.collection('blocks').document(str(idx)).get()
-                    if doc.exists:
-                        fs_block = doc.to_dict()
-                        authentic_data = fs_block.get('data')
-                        authentic_hash = fs_block.get('current_hash')
-                except Exception as e:
-                    print(f"Error fetching block from Firestore: {e}")
-            
             broken_block_info = {
                 'block_index': broken_block.block_index,
                 'block_type': broken_block.block_type,
@@ -265,8 +247,8 @@ def validate():
                 'recalculated_hash': recalculated_hash,
                 'stored_data': broken_block.data,
                 'previous_hash': broken_block.previous_hash,
-                'authentic_hash': authentic_hash,
-                'authentic_data': authentic_data
+                'authentic_hash': None,
+                'authentic_data': None
             }
             
     return render_template('admin/validate.html', 
@@ -288,60 +270,5 @@ def simulate_tamper():
 @login_required
 @role_required('Admin')
 def restore_integrity():
-    from firebase_config import get_db
-    db_fs = get_db()
-    if not db_fs:
-        flash('Firebase not initialized. Cannot restore integrity.', 'error')
-        return redirect(url_for('admin.validate'))
-        
-    try:
-        fs_blocks = db_fs.collection('blocks').order_by('block_index').get()
-        restored_count = 0
-        for doc in fs_blocks:
-            data_dict = doc.to_dict()
-            idx = data_dict['block_index']
-            
-            sqlite_block = BlockModel.query.filter_by(block_index=idx).first()
-            if sqlite_block:
-                if (sqlite_block.data != data_dict['data'] or 
-                    sqlite_block.current_hash != data_dict['current_hash'] or 
-                    sqlite_block.previous_hash != data_dict['previous_hash']):
-                    
-                    sqlite_block.data = data_dict['data']
-                    sqlite_block.current_hash = data_dict['current_hash']
-                    sqlite_block.previous_hash = data_dict['previous_hash']
-                    sqlite_block.timestamp = data_dict['timestamp']
-                    sqlite_block.block_type = data_dict['block_type']
-                    sqlite_block.warehouse_id = data_dict.get('warehouse_id')
-                    sqlite_block.route_hash = data_dict.get('route_hash')
-                    sqlite_block.verification_status = data_dict.get('verification_status')
-                    sqlite_block.digital_proof_hash = data_dict.get('digital_proof_hash')
-                    restored_count += 1
-            else:
-                new_block = BlockModel(
-                    block_index=idx,
-                    shipment_id=data_dict.get('shipment_id'),
-                    block_type=data_dict['block_type'],
-                    warehouse_id=data_dict.get('warehouse_id'),
-                    data=data_dict['data'],
-                    previous_hash=data_dict['previous_hash'],
-                    current_hash=data_dict['current_hash'],
-                    route_hash=data_dict.get('route_hash'),
-                    verification_status=data_dict.get('verification_status'),
-                    digital_proof_hash=data_dict.get('digital_proof_hash'),
-                    timestamp=data_dict['timestamp']
-                )
-                db.session.add(new_block)
-                restored_count += 1
-                
-        if restored_count > 0:
-            db.session.commit()
-            flash(f'Self-healing completed! Restored {restored_count} block(s) from Firebase.', 'success')
-        else:
-            flash('No discrepancies found. SQLite chain is already intact.', 'info')
-            
-    except Exception as e:
-        db.session.rollback()
-        flash(f'Self-healing failed: {str(e)}', 'error')
-        
+    flash('Self-healing is currently unavailable because the cloud sync layer was removed.', 'error')
     return redirect(url_for('admin.validate'))

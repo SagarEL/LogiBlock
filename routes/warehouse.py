@@ -2,7 +2,6 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import login_required, current_user
 from routes.auth import role_required
 from models import db, Shipment, Warehouse, RouteWarehouse, Alert
-from firebase_sync import sync_shipment_to_firebase
 
 warehouse_bp = Blueprint('warehouse', __name__)
 
@@ -36,7 +35,6 @@ def verify(shipment_id):
             shipment.current_location = wh.warehouse_name
             shipment.next_warehouse_sequence += 1
             db.session.commit()
-            sync_shipment_to_firebase(shipment)
             
             blockchain.add_block(shipment_id, "WAREHOUSE_VERIFIED", {
                 "message": "Parcel verified at warehouse",
@@ -51,11 +49,9 @@ def verify(shipment_id):
                 # It must now be delivered to the client by the Delivery Agent using the Hashlock PIN.
                 shipment.current_location = f"{wh.warehouse_name} (Ready for Delivery)"
                 db.session.commit()
-                sync_shipment_to_firebase(shipment)
         else:
             shipment.status = 'Suspicious'
             db.session.commit()
-            sync_shipment_to_firebase(shipment)
             
             alert_id = "ALT-" + str(shipment.id) + str(wh.id)
             alert = Alert(alert_id=alert_id, shipment_id=shipment_id, alert_type="ROUTE_VIOLATION", description=f"Expected WH sequence {shipment.next_warehouse_sequence}, got {wh_id}")

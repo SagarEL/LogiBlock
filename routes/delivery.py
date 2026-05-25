@@ -64,9 +64,6 @@ def finalize_delivery(shipment_id):
             "message": "Delivery successfully cryptographically verified via Secret PIN."
         }, digital_proof_hash=pin_hash)
         
-        from firebase_sync import sync_shipment_to_firebase
-        sync_shipment_to_firebase(shipment)
-        
         flash('Hashlock verified! Delivery successfully finalized.', 'success')
     else:
         from app import blockchain

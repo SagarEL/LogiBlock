@@ -34,12 +34,6 @@ class Blockchain:
             )
             db.session.add(genesis_block)
             db.session.commit()
-            
-            try:
-                from firebase_sync import sync_block_to_firebase
-                sync_block_to_firebase(genesis_block)
-            except Exception as e:
-                print(f"Error syncing genesis block: {e}")
 
     def get_latest_block(self):
         return BlockModel.query.order_by(BlockModel.block_index.desc()).first()
@@ -68,12 +62,6 @@ class Blockchain:
         )
         db.session.add(new_block)
         db.session.commit()
-        
-        try:
-            from firebase_sync import sync_block_to_firebase
-            sync_block_to_firebase(new_block)
-        except Exception as e:
-            print(f"Error syncing block: {e}")
             
         return new_block
 
